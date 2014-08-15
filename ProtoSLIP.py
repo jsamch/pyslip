@@ -3,6 +3,7 @@ import serial
 from collections import deque
 
 # declared in octal  
+GARBAGE_CHAR = 0123
 SLIP_END = 0300
 SLIP_ESC = 0333
 SLIP_ESC_END = 0334
@@ -15,6 +16,14 @@ readBufferQueue = deque([])
 def encodeToSLIP(byteList):
     tempSLIPBuffer = []
     tempSLIPBuffer.append(SLIP_END)
+
+    # UGLY HACK
+    # Append garbage characters to avoid a bug where the 2nd and 3rd byte
+    # are not interpreted by the MCU
+    tempSLIPBuffer.append(GARBAGE_CHAR)
+    tempSLIPBuffer.append(GARBAGE_CHAR)
+
+    print(byteList + '\n')
     for i in byteList:
         if i == SLIP_END:
             tempSLIPBuffer.append(SLIP_ESC)
@@ -31,14 +40,17 @@ def encodeToSLIP(byteList):
 def decodeFromSLIP(serialFD):
     dataBuffer = []
     while 1:
-        serialByte = getSerialByte(serialFD)
+        # serialByte = getSerialByte(serialFD)
+        serialByte = ord(serialFD.read())
+        print("Got a serial byte: " + str(serialByte))
         if serialByte is None:
             return -1
         elif serialByte == SLIP_END:
             if len(dataBuffer) > 0:
                 return dataBuffer
         elif serialByte == SLIP_ESC:
-            serialByte = getSerialByte(serialFD)
+            # serialByte = getSerialByte(serialFD)
+            serialByte = ord(serialFD.read())
             if serialByte is None:
                 return -1 
             elif serialByte == SLIP_ESC_END:
@@ -51,7 +63,7 @@ def decodeFromSLIP(serialFD):
                 print("Protocol Error")
         else:
              dataBuffer.append(serialByte)
-    return
+    return -1
 
 # This function read byte chuncks from the serial port and return one byte at a time  
 def getSerialByte(serialFD):
@@ -60,6 +72,7 @@ def getSerialByte(serialFD):
         i = 0
         while len(readBufferQueue) < MAX_MTU:
             newByte = ord(serialFD.read())
+            print("newByte: "+ str(newByte))
             readBufferQueue.append(newByte)
         newByte = readBufferQueue.popleft()
         return newByte

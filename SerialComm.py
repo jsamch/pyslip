@@ -1,18 +1,26 @@
 import ProtoSLIP
 import termios
 import serial
+import platform
 
 # This function connect and configure the serial port. Then returns the file discripter  
 def connectToSerialPort():
-    port = '/dev/ttyACM0'
-    serialFD = serial.Serial(port=port, baudrate=115200, bytesize=8, parity='N', stopbits=1, xonxoff=False, rtscts=False)
+    if platform.system() == 'Windows':
+        port = 'COM1'
+    elif platform.system() == 'Linux':
+        port = '/dev/ttyUSB0'
+    else:
+        print('Unrecognized platform')
+        return
+
+    serialFD = serial.Serial(port=port, baudrate=500000, bytesize=8, parity='N', stopbits=1, xonxoff=False, rtscts=False)
     # port='/dev/ttyUSB0'- port to open  
-    # baudrate=115200  - baud rate to communicate with the port  
+    # baudrate=500000  - baud rate to communicate with the port  
     # bytesize=8           - size of a byte  
     # parity='N'           - no parity  
     # stopbits=1           - 1 stop bit  
     # xonxoff=False           - no software handshakes  
-    # rtscts=False           - no hardware handshakes  
+    # rtscts=False           - no hardware hand shakes  
     if serialFD < 0:
         print("Couldn't open serial port")
         return -1
@@ -25,6 +33,7 @@ def writeToSerialPort(serialFD, byteArray):
     encodedSLIPBytes = ProtoSLIP.encodeToSLIP(byteArray)
     #convert byte list to a string
     byteString = ''.join(chr(b) for b in encodedSLIPBytes)
+    print(byteString)
     serialFD.write(byteString)
     return
 
