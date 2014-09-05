@@ -20,10 +20,10 @@ def encodeToSLIP(byteList):
     # UGLY HACK
     # Append garbage characters to avoid a bug where the 2nd and 3rd byte
     # are not interpreted by the MCU
-    tempSLIPBuffer.append(GARBAGE_CHAR)
-    tempSLIPBuffer.append(GARBAGE_CHAR)
+    # tempSLIPBuffer.append(GARBAGE_CHAR)
+    # tempSLIPBuffer.append(GARBAGE_CHAR)
 
-    print(byteList + '\n')
+    # print(byteList + '\n')
     for i in byteList:
         if i == SLIP_END:
             tempSLIPBuffer.append(SLIP_ESC)
@@ -41,24 +41,33 @@ def decodeFromSLIP(serialFD):
     dataBuffer = []
     while 1:
         # serialByte = getSerialByte(serialFD)
-        serialByte = ord(serialFD.read())
-        print("Got a serial byte: " + str(serialByte))
-        if serialByte is None:
+        # serialByte = ord(serialFD.read())
+        serialByte = serialFD.read()
+        intSerialByte = ord(serialByte)
+        # print("Got a serial byte: " + str(serialByte))
+        if intSerialByte is None:
             return -1
-        elif serialByte == SLIP_END:
+        elif intSerialByte == SLIP_END:
             if len(dataBuffer) > 0:
-                return dataBuffer
-        elif serialByte == SLIP_ESC:
+                # print(dataBuffer)
+                # print('len of data_buffer is ' + str(len(dataBuffer)))
+                # for x in xrange(0,len(dataBuffer)-1):
+                    # if type(dataBuffer[x]) == int:
+                        # print('dataBuffer['+str(x)+'] = '+ str(dataBuffer[x]))
+                return ''.join(dataBuffer)
+        elif intSerialByte == SLIP_ESC:
             # serialByte = getSerialByte(serialFD)
-            serialByte = ord(serialFD.read())
-            if serialByte is None:
+            serialByte = serialFD.read()
+            intSerialByte = ord(serialByte)
+            # serialByte = ord(serialFD.read())
+            if intSerialByte is None:
                 return -1 
-            elif serialByte == SLIP_ESC_END:
-                dataBuffer.append(SLIP_END)
-            elif serialByte == SLIP_ESC_ESC:
-                dataBuffer.append(SLIP_ESC)
-            elif serialByte == DEBUG_MAKER:
-                dataBuffer.append(DEBUG_MAKER)
+            elif intSerialByte == SLIP_ESC_END:
+                dataBuffer.append('\xc0')
+            elif intSerialByte == SLIP_ESC_ESC:
+                dataBuffer.append('\xdb')
+            # elif intSerialByte == DEBUG_MAKER:
+            #     dataBuffer.append(DEBUG_MAKER)
             else:
                 print("Protocol Error")
         else:
@@ -72,7 +81,6 @@ def getSerialByte(serialFD):
         i = 0
         while len(readBufferQueue) < MAX_MTU:
             newByte = ord(serialFD.read())
-            print("newByte: "+ str(newByte))
             readBufferQueue.append(newByte)
         newByte = readBufferQueue.popleft()
         return newByte

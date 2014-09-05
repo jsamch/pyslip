@@ -13,7 +13,7 @@ def connectToSerialPort():
         print('Unrecognized platform')
         return
 
-    serialFD = serial.Serial(port=port, baudrate=500000, bytesize=8, parity='N', stopbits=1, xonxoff=False, rtscts=False)
+    serialFD = serial.Serial(port=port, baudrate=115200, bytesize=8, parity='N', stopbits=1, xonxoff=False, rtscts=False)
     # port='/dev/ttyUSB0'- port to open  
     # baudrate=500000  - baud rate to communicate with the port  
     # bytesize=8           - size of a byte  
@@ -25,7 +25,7 @@ def connectToSerialPort():
         print("Couldn't open serial port")
         return -1
     else:
-        print("Opened serial port")
+        # print("Opened serial port")
         return serialFD
 
 # This function accept a byte array and write it to the serial port  
@@ -33,7 +33,8 @@ def writeToSerialPort(serialFD, byteArray):
     encodedSLIPBytes = ProtoSLIP.encodeToSLIP(byteArray)
     #convert byte list to a string
     byteString = ''.join(chr(b) for b in encodedSLIPBytes)
-    print(byteString)
+    # print(byteString)
+    # print ('\nWriting ' + str(byteString)) 
     serialFD.write(byteString)
     return
 
