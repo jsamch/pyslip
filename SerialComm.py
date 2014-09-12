@@ -13,7 +13,7 @@ def connectToSerialPort():
         print('Unrecognized platform')
         return
 
-    serialFD = serial.Serial(port=port, baudrate=115200, bytesize=8, parity='N', stopbits=1, xonxoff=False, rtscts=False)
+    serialFD = serial.Serial(port=port, baudrate=38400, bytesize=8, parity='N', stopbits=1, xonxoff=False, rtscts=False)
     # port='/dev/ttyUSB0'- port to open  
     # baudrate=500000  - baud rate to communicate with the port  
     # bytesize=8           - size of a byte  
